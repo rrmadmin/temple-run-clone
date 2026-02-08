@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { PALETTE } from './config.ts';
 
 // --- Enderman-style shared geometries (all BoxGeometry, tall & thin) ---
 const chaserGeo = {
@@ -13,20 +14,20 @@ const chaserGeo = {
 // --- Shared materials ---
 const chaserMat = {
   body: new THREE.MeshStandardMaterial({
-    color: 0x0a0a0a,
+    color: PALETTE.enderman.body,
     roughness: 1.0,
     metalness: 0,
-    emissive: 0x1a0030,
+    emissive: PALETTE.enderman.bodyEmissive,
     emissiveIntensity: 0.3,
   }),
   eye: new THREE.MeshStandardMaterial({
-    color: 0xcc55ff,
-    emissive: 0xcc55ff,
+    color: PALETTE.enderman.eyes,
+    emissive: PALETTE.enderman.eyes,
     emissiveIntensity: 3.0,
   }),
   particle: new THREE.MeshStandardMaterial({
-    color: 0x6622aa,
-    emissive: 0x6622aa,
+    color: PALETTE.enderman.particles,
+    emissive: PALETTE.enderman.particles,
     emissiveIntensity: 1.5,
     transparent: true,
     opacity: 0.7,
@@ -147,7 +148,7 @@ function createChaser(): Chaser {
     particles.push(p);
   }
 
-  const light = new THREE.PointLight(0x8844cc, 1.5, 15);
+  const light = new THREE.PointLight(PALETTE.enderman.aura, 1.5, 15);
   light.position.y = 2.0;
   group.add(light);
 

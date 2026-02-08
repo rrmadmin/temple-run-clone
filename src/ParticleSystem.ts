@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { EventBus } from './EventBus.ts';
+import { PALETTE } from './config.ts';
 
 const MAX_PARTICLES = 200;
 
@@ -49,7 +50,7 @@ export class ParticleSystem {
       if (coin) {
         const lanePositions = [-2.5, 0, 2.5];
         const pos = new THREE.Vector3(lanePositions[coin.lane], 1.2, coin.z);
-        this.spawnBurst(pos, 8, new THREE.Color(0xffd700), 3);
+        this.spawnBurst(pos, 8, new THREE.Color(PALETTE.particles.coinBurst), 3);
       }
     });
 
@@ -59,7 +60,7 @@ export class ParticleSystem {
         const lanePositions = [-2.5, 0, 2.5];
         const laneX = lanePositions[obs.lanes[0]] ?? 0;
         const pos = new THREE.Vector3(laneX, 1.0, obs.z);
-        this.spawnBurst(pos, 20, new THREE.Color(0xff3333), 5);
+        this.spawnBurst(pos, 20, new THREE.Color(PALETTE.particles.obstacleBurst), 5);
       }
     });
   }
@@ -86,7 +87,7 @@ export class ParticleSystem {
   }
 
   spawnTrail(position: THREE.Vector3, color?: THREE.Color): void {
-    const c = color ?? new THREE.Color(0x886644);
+    const c = color ?? new THREE.Color(PALETTE.particles.trail);
     const count = 1 + (Math.random() < 0.3 ? 1 : 0);
     for (let i = 0; i < count; i++) {
       if (this.particles.length >= MAX_PARTICLES) break;

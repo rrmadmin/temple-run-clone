@@ -3,17 +3,8 @@ import { EventBus } from './EventBus.ts';
 import {
   LANE_POSITIONS, PLAYER_Y,
   JUMP_FORCE, GRAVITY, SLIDE_DURATION, LANE_SWITCH_SPEED,
+  PALETTE,
 } from './config.ts';
-
-// --- Minecraft Steve color palette ---
-const SKIN_COLOR = 0xc89b7b;       // Steve's skin tone
-const SHIRT_COLOR = 0x00aaaa;      // Steve's iconic cyan/teal shirt
-const PANTS_COLOR = 0x2b2b8f;      // Steve's dark blue pants
-const SHOE_COLOR = 0x3a3a3a;       // dark grey shoes
-const HAIR_COLOR = 0x4a3728;       // Steve's dark brown hair
-const EYE_COLOR = 0x3b2213;        // dark brown eyes
-const MOUTH_COLOR = 0x694b3a;      // darker skin for mouth
-const EYE_WHITE = 0xffffff;
 
 const LIMB_BASE_FREQ = 8; // radians/sec at base speed
 
@@ -43,14 +34,14 @@ const geo = {
 
 // --- Shared materials (flat/blocky look, low metalness) ---
 const mat = {
-  skin: new THREE.MeshStandardMaterial({ color: SKIN_COLOR, roughness: 1.0, metalness: 0 }),
-  shirt: new THREE.MeshStandardMaterial({ color: SHIRT_COLOR, roughness: 1.0, metalness: 0 }),
-  pants: new THREE.MeshStandardMaterial({ color: PANTS_COLOR, roughness: 1.0, metalness: 0 }),
-  shoe: new THREE.MeshStandardMaterial({ color: SHOE_COLOR, roughness: 1.0, metalness: 0 }),
-  hair: new THREE.MeshStandardMaterial({ color: HAIR_COLOR, roughness: 1.0, metalness: 0 }),
-  eye: new THREE.MeshStandardMaterial({ color: EYE_COLOR, roughness: 1.0, metalness: 0 }),
-  eyeWhite: new THREE.MeshStandardMaterial({ color: EYE_WHITE, roughness: 1.0, metalness: 0 }),
-  mouth: new THREE.MeshStandardMaterial({ color: MOUTH_COLOR, roughness: 1.0, metalness: 0 }),
+  skin: new THREE.MeshStandardMaterial({ color: PALETTE.player.skin, roughness: 1.0, metalness: 0 }),
+  shirt: new THREE.MeshStandardMaterial({ color: PALETTE.player.shirt, roughness: 1.0, metalness: 0 }),
+  pants: new THREE.MeshStandardMaterial({ color: PALETTE.player.pants, roughness: 1.0, metalness: 0 }),
+  shoe: new THREE.MeshStandardMaterial({ color: PALETTE.player.shoes, roughness: 1.0, metalness: 0 }),
+  hair: new THREE.MeshStandardMaterial({ color: PALETTE.player.hair, roughness: 1.0, metalness: 0 }),
+  eye: new THREE.MeshStandardMaterial({ color: PALETTE.player.eyes, roughness: 1.0, metalness: 0 }),
+  eyeWhite: new THREE.MeshStandardMaterial({ color: PALETTE.player.eyeWhite, roughness: 1.0, metalness: 0 }),
+  mouth: new THREE.MeshStandardMaterial({ color: PALETTE.player.mouth, roughness: 1.0, metalness: 0 }),
 };
 
 export class Player {

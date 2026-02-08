@@ -32,17 +32,105 @@ export const DIFFICULTY_TIERS = [
 export const DIFFICULTY_LOG_DIVISOR = 200; // distance divisor for log curve
 export const DIFFICULTY_LOG_CAP = 4;       // log2 denominator cap
 
+// === CENTRALIZED COLOR PALETTE ===
+export const PALETTE = {
+  // Player (Minecraft Steve)
+  player: {
+    skin: 0xc89b7b,
+    shirt: 0x00aaaa,
+    pants: 0x2b2b8f,
+    shoes: 0x3a3a3a,
+    hair: 0x4a3728,
+    eyes: 0x3b2213,
+    mouth: 0x694b3a,
+    eyeWhite: 0xffffff,
+  },
+
+  // Enemies (Enderman)
+  enderman: {
+    body: 0x0a0a0a,
+    bodyEmissive: 0x1a0030,
+    eyes: 0xcc55ff,
+    particles: 0x6622aa,
+    aura: 0x8844cc,
+  },
+
+  // Obstacles (by type)
+  obstacles: {
+    barrier: 0xcc3333,
+    lowHurdle: 0xcc8833,
+    highBarrier: 0x8833cc,
+    twoLane: 0x881111,
+    gap: 0x111111,
+  },
+
+  // Decorations
+  decor: {
+    torchStick: 0x4a3520,
+    torchFlame: 0xffaa00,
+    torchEmissive: 0xff6600,
+    torchLight: 0xff8833,
+    pillar: 0x7a6a50,
+    archway: 0x6a5a40,
+    edgeMarker: 0x8b3a3a,
+  },
+
+  // Power-ups
+  powerups: {
+    magnet:     { main: 0x4488ff, emissive: 0x1144aa },
+    shield:     { main: 0x44ff66, emissive: 0x11aa33 },
+    multiplier: { main: 0xffcc00, emissive: 0xaa8800 },
+    speedBoost: { main: 0xff6600, emissive: 0xaa3300 },
+    slowMo:     { main: 0x6644ff, emissive: 0x3322aa },
+    coinFrenzy: { main: 0xffdd00, emissive: 0xbbaa00 },
+  },
+
+  // Particles
+  particles: {
+    coinBurst: 0xffd700,
+    obstacleBurst: 0xff3333,
+    trail: 0x886644,
+  },
+
+  // Scene lighting
+  lighting: {
+    ambient: 0xffffff,
+    directional: 0xffffff,
+  },
+
+  // Biome decorations
+  biomeDecor: {
+    // Temple
+    relief: 0x6a5a40,
+    tileLine: 0x5a4a30,
+    // Jungle
+    vine: 0x2a5a1a,
+    moss: 0x3a6a2a,
+    mossEmissive: 0x1a3a0a,
+    root: 0x3a2a1a,
+    // Cave
+    stalactite: 0x4a4540,
+    crystal: 0x6a6aff,
+    crystalEmissive: 0x4444aa,
+    caveFloorOverlay: 0x2a2520,
+    // Ruins
+    crumbled: 0xa08848,
+    sandDrift: 0xc4a868,
+    crack: 0x3a3020,
+  },
+} as const;
+
 // Obstacles
 export const OBSTACLE_MIN_SPACING = 12; // world units between obstacles (base, overridden by difficulty)
 export const OBSTACLE_START_DISTANCE = 40; // no obstacles for first N units
 
-// Obstacle colors per type
+// Obstacle colors per type (derived from PALETTE)
 export const OBSTACLE_COLORS = {
-  barrier:      0xcc3333,
-  low_hurdle:   0xcc8833,
-  high_barrier: 0x8833cc,
-  two_lane:     0x881111,
-  gap:          0x111111,
+  barrier:      PALETTE.obstacles.barrier,
+  low_hurdle:   PALETTE.obstacles.lowHurdle,
+  high_barrier: PALETTE.obstacles.highBarrier,
+  two_lane:     PALETTE.obstacles.twoLane,
+  gap:          PALETTE.obstacles.gap,
 } as const;
 
 // Coins
@@ -68,20 +156,17 @@ export const CAMERA_LERP_SPEED = 5;
 export const SKY_COLOR = 0x4a8a4a;
 export const FOG_NEAR = 25;
 export const FOG_FAR = 90;
-export const PATH_COLOR = 0x5a4a2a;         // muddy jungle trail
-export const WALL_COLOR = 0x3a4a20;         // mossy stone
-export const PLAYER_COLOR = 0x00aaaa;       // Steve's cyan (unused by Player now)
-export const OBSTACLE_COLOR = 0xcc3333;
-export const COIN_COLOR = 0xffd700;
 
 // Segment themes: jungle trail with mossy earth borders
 export const SEGMENT_THEMES = [
-  { name: 'mud',     floor: 0x5a4a2a, wall: 0x3a4a20, accent: 0x4a5a28 },  // muddy trail, mossy stone
-  { name: 'loam',    floor: 0x6a5a38, wall: 0x4a5a2a, accent: 0x3a4a1a },  // rich dark soil
-  { name: 'fern',    floor: 0x4a5a30, wall: 0x3a5a28, accent: 0x2a4a18 },  // overgrown earthy path
+  { name: 'mud',     floor: 0x5a4a2a, wall: 0x3a4a20, accent: 0x4a5a28 },
+  { name: 'loam',    floor: 0x6a5a38, wall: 0x4a5a2a, accent: 0x3a4a1a },
+  { name: 'fern',    floor: 0x4a5a30, wall: 0x3a5a28, accent: 0x2a4a18 },
 ] as const;
 
 // Biome system
+type SegmentTheme = { name: string; floor: number; wall: number; accent: number };
+
 export interface BiomeConfig {
   name: string;
   skyColor: number;
@@ -89,7 +174,16 @@ export interface BiomeConfig {
   fogFar: number;
   lightColor: number;
   lightIntensity: number;
-  themes: typeof SEGMENT_THEMES;
+  themes: readonly SegmentTheme[];
+  obstacleColor: number;
+  obstacleAccent: number;
+  torchTint: number;
+  stripes: number[];
+  decorMaterials: {
+    primary: number;
+    secondary: number;
+    emissive?: number;
+  };
 }
 
 export const BIOME_DISTANCE = 500;
@@ -103,10 +197,15 @@ export const BIOMES: BiomeConfig[] = [
     lightColor: 0xbbffbb,
     lightIntensity: 0.65,
     themes: [
-      { name: 'mud',     floor: 0x5a4a2a, wall: 0x3a4a20, accent: 0x4a5a28 },  // muddy trail, mossy stone
-      { name: 'loam',    floor: 0x6a5a38, wall: 0x4a5a2a, accent: 0x3a4a1a },  // rich dark soil
-      { name: 'fern',    floor: 0x4a5a30, wall: 0x3a5a28, accent: 0x2a4a18 },  // overgrown earthy path
+      { name: 'mud',     floor: 0x5a4a2a, wall: 0x3a4a20, accent: 0x4a5a28 },
+      { name: 'loam',    floor: 0x6a5a38, wall: 0x4a5a2a, accent: 0x3a4a1a },
+      { name: 'fern',    floor: 0x4a5a30, wall: 0x3a5a28, accent: 0x2a4a18 },
     ],
+    obstacleColor: 0x6a4a2a,
+    obstacleAccent: 0x3a6a2a,
+    torchTint: 0x66aa44,
+    stripes: [0x5a4a2a, 0x6a5a38, 0x4a5a30],
+    decorMaterials: { primary: PALETTE.biomeDecor.vine, secondary: PALETTE.biomeDecor.moss, emissive: PALETTE.biomeDecor.mossEmissive },
   },
   {
     name: 'Temple',
@@ -116,10 +215,15 @@ export const BIOMES: BiomeConfig[] = [
     lightColor: 0xfff8e8,
     lightIntensity: 0.85,
     themes: [
-      { name: 'dirt',    floor: 0x8b7355, wall: 0x6a5a3a, accent: 0x7a6a4a },  // dirt path, earthy stone edges
-      { name: 'packed',  floor: 0x9a8060, wall: 0x7a6a48, accent: 0x6a5a38 },  // packed earth
-      { name: 'clay',    floor: 0x7a6048, wall: 0x5a4a30, accent: 0x6a5a40 },  // clay path
+      { name: 'dirt',    floor: 0x8b7355, wall: 0x6a5a3a, accent: 0x7a6a4a },
+      { name: 'packed',  floor: 0x9a8060, wall: 0x7a6a48, accent: 0x6a5a38 },
+      { name: 'clay',    floor: 0x7a6048, wall: 0x5a4a30, accent: 0x6a5a40 },
     ],
+    obstacleColor: 0x7a7a6a,
+    obstacleAccent: 0x6a6a5a,
+    torchTint: PALETTE.decor.torchLight,
+    stripes: [0x8b7355, 0x9a8060, 0x7a6048],
+    decorMaterials: { primary: PALETTE.biomeDecor.relief, secondary: PALETTE.biomeDecor.tileLine },
   },
   {
     name: 'Cave',
@@ -129,10 +233,15 @@ export const BIOMES: BiomeConfig[] = [
     lightColor: 0x6688aa,
     lightIntensity: 0.4,
     themes: [
-      { name: 'rock',    floor: 0x3a3530, wall: 0x2a2520, accent: 0x1a1510 },  // dark rocky ground
-      { name: 'slate',   floor: 0x35302a, wall: 0x252018, accent: 0x2a2520 },  // slate grey-brown
-      { name: 'damp',    floor: 0x2a2a25, wall: 0x1a1a18, accent: 0x252520 },  // damp stone floor
+      { name: 'rock',    floor: 0x3a3530, wall: 0x2a2520, accent: 0x1a1510 },
+      { name: 'slate',   floor: 0x35302a, wall: 0x252018, accent: 0x2a2520 },
+      { name: 'damp',    floor: 0x2a2a25, wall: 0x1a1a18, accent: 0x252520 },
     ],
+    obstacleColor: 0x4a4a5a,
+    obstacleAccent: 0x3a3a4a,
+    torchTint: 0x4466cc,
+    stripes: [0x3a3530, 0x35302a, 0x2a2a25],
+    decorMaterials: { primary: PALETTE.biomeDecor.stalactite, secondary: PALETTE.biomeDecor.crystal, emissive: PALETTE.biomeDecor.crystalEmissive },
   },
   {
     name: 'Ruins',
@@ -142,19 +251,24 @@ export const BIOMES: BiomeConfig[] = [
     lightColor: 0xffcc88,
     lightIntensity: 0.9,
     themes: [
-      { name: 'sand',    floor: 0xc4a868, wall: 0xa08848, accent: 0x907838 },  // sandy path, sandstone edges
-      { name: 'dust',    floor: 0xb09058, wall: 0x907040, accent: 0x806030 },  // dusty trail
-      { name: 'desert',  floor: 0xbaa060, wall: 0x9a8040, accent: 0x8a7030 },  // sun-baked earth
+      { name: 'sand',    floor: 0xc4a868, wall: 0xa08848, accent: 0x907838 },
+      { name: 'dust',    floor: 0xb09058, wall: 0x907040, accent: 0x806030 },
+      { name: 'desert',  floor: 0xbaa060, wall: 0x9a8040, accent: 0x8a7030 },
     ],
+    obstacleColor: 0xb49858,
+    obstacleAccent: 0x9a8048,
+    torchTint: PALETTE.decor.torchLight,
+    stripes: [0xc4a868, 0xb09058, 0xbaa060],
+    decorMaterials: { primary: PALETTE.biomeDecor.crumbled, secondary: PALETTE.biomeDecor.sandDrift },
   },
 ];
 
-// Decorative elements
-export const TORCH_LIGHT_COLOR = 0xff8833;
+// Decorative elements (derived from PALETTE)
+export const TORCH_LIGHT_COLOR = PALETTE.decor.torchLight;
 export const TORCH_LIGHT_INTENSITY = 0.8;
 export const TORCH_LIGHT_DISTANCE = 12;
-export const PILLAR_COLOR = 0x7a6a50;    // weathered stone
-export const ARCHWAY_COLOR = 0x6a5a40;   // aged stone
+export const PILLAR_COLOR = PALETTE.decor.pillar;
+export const ARCHWAY_COLOR = PALETTE.decor.archway;
 
 // Wall dimensions (enhanced)
 export const WALL_WIDTH = 0.8;

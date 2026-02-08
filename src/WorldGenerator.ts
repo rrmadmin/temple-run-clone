@@ -3,12 +3,13 @@ import {
   SEGMENT_LENGTH, SEGMENT_WIDTH, SEGMENTS_AHEAD, SEGMENTS_BEHIND,
   LANE_POSITIONS,
   OBSTACLE_START_DISTANCE,
-  COIN_COLOR, COIN_RADIUS, COIN_HEIGHT, COIN_SPACING, COIN_TIERS,
+  COIN_RADIUS, COIN_HEIGHT, COIN_SPACING, COIN_TIERS,
   OBSTACLE_COLORS,
   SEGMENT_THEMES, SEGMENT_POOL_SIZE,
   TORCH_LIGHT_COLOR, TORCH_LIGHT_INTENSITY, TORCH_LIGHT_DISTANCE,
   PILLAR_COLOR, ARCHWAY_COLOR,
   WALL_WIDTH, WALL_HEIGHT, WALL_INSET_DEPTH,
+  PALETTE, BIOMES,
   type BiomeConfig,
 } from './config.ts';
 import { EventBus } from './EventBus.ts';
@@ -189,9 +190,8 @@ export class WorldGenerator {
       accent: new THREE.MeshStandardMaterial({ color: t.accent, roughness: 0.8, metalness: 0 }),
     }));
 
-    // Per-theme stripe materials (worn track lines in the dirt)
-    const stripeColors = [0x6a5a3a, 0x7a6a48, 0x5a4a30];
-    this.stripeMats = stripeColors.map(c => new THREE.MeshStandardMaterial({
+    // Per-theme stripe materials (worn track lines in the dirt — start with Jungle)
+    this.stripeMats = BIOMES[0].stripes.map(c => new THREE.MeshStandardMaterial({
       color: c, metalness: 0, roughness: 0.9,
     }));
 
@@ -204,31 +204,25 @@ export class WorldGenerator {
       gap:          new THREE.MeshStandardMaterial({ color: OBSTACLE_COLORS.gap }),
     };
 
-    // Biome-specific obstacle materials
-    this.obstBiomeMats = {
-      Temple: new THREE.MeshStandardMaterial({ color: 0x7a7a6a, roughness: 0.9 }),
-      Jungle: new THREE.MeshStandardMaterial({ color: 0x6a4a2a, roughness: 0.7 }),
-      Cave:   new THREE.MeshStandardMaterial({ color: 0x4a4a5a, roughness: 0.95 }),
-      Ruins:  new THREE.MeshStandardMaterial({ color: 0xb49858, roughness: 0.85 }),
-    };
-    this.obstBiomeAccentMats = {
-      Temple: new THREE.MeshStandardMaterial({ color: 0x6a6a5a, roughness: 0.9 }),
-      Jungle: new THREE.MeshStandardMaterial({ color: 0x3a6a2a, roughness: 0.7 }),
-      Cave:   new THREE.MeshStandardMaterial({ color: 0x3a3a4a, roughness: 0.95 }),
-      Ruins:  new THREE.MeshStandardMaterial({ color: 0x9a8048, roughness: 0.85 }),
-    };
+    // Biome-specific obstacle materials (derived from biome config)
+    this.obstBiomeMats = {} as Record<string, THREE.MeshStandardMaterial>;
+    this.obstBiomeAccentMats = {} as Record<string, THREE.MeshStandardMaterial>;
+    for (const biome of BIOMES) {
+      this.obstBiomeMats[biome.name] = new THREE.MeshStandardMaterial({ color: biome.obstacleColor, roughness: 0.85 });
+      this.obstBiomeAccentMats[biome.name] = new THREE.MeshStandardMaterial({ color: biome.obstacleAccent, roughness: 0.85 });
+    }
 
     this.pillarMat = new THREE.MeshStandardMaterial({ color: PILLAR_COLOR });
     this.archwayMat = new THREE.MeshStandardMaterial({ color: ARCHWAY_COLOR });
     // Minecraft-style torch: dark brown stick with bright orange/yellow flame top
     this.torchStickMat = new THREE.MeshStandardMaterial({
-      color: 0x4a3520,
+      color: PALETTE.decor.torchStick,
       roughness: 0.9,
       metalness: 0,
     });
     this.torchTopMat = new THREE.MeshStandardMaterial({
-      color: 0xffaa00,
-      emissive: 0xff6600,
+      color: PALETTE.decor.torchFlame,
+      emissive: PALETTE.decor.torchEmissive,
       emissiveIntensity: 2.0,
     });
 
@@ -270,7 +264,7 @@ export class WorldGenerator {
     // Edge marker for open-edge segments (thin strip at floor level)
     this.edgeMarkerGeo = new THREE.BoxGeometry(0.15, 0.06, SEGMENT_LENGTH);
     this.edgeMarkerMat = new THREE.MeshStandardMaterial({
-      color: 0x8b3a3a, roughness: 0.9, metalness: 0,
+      color: PALETTE.decor.edgeMarker, roughness: 0.9, metalness: 0,
     });
 
     // Biome decoration geometries
@@ -287,23 +281,23 @@ export class WorldGenerator {
     this.sandDriftGeo = new THREE.BoxGeometry(1.2, 0.15, 2.0);
     this.crackLineGeo = new THREE.BoxGeometry(2.5, 0.02, 0.04);
 
-    // Biome decoration materials (earthy/natural tones)
-    this.reliefMat = new THREE.MeshStandardMaterial({ color: 0x6a5a40, roughness: 0.9 });      // carved stone
-    this.tileLineMat = new THREE.MeshStandardMaterial({ color: 0x5a4a30, roughness: 0.85 });    // worn grooves
-    this.vineMat = new THREE.MeshStandardMaterial({ color: 0x2a5a1a, roughness: 0.7 });
+    // Biome decoration materials (derived from PALETTE)
+    this.reliefMat = new THREE.MeshStandardMaterial({ color: PALETTE.biomeDecor.relief, roughness: 0.9 });
+    this.tileLineMat = new THREE.MeshStandardMaterial({ color: PALETTE.biomeDecor.tileLine, roughness: 0.85 });
+    this.vineMat = new THREE.MeshStandardMaterial({ color: PALETTE.biomeDecor.vine, roughness: 0.7 });
     this.mossMat = new THREE.MeshStandardMaterial({
-      color: 0x3a6a2a, emissive: 0x1a3a0a, emissiveIntensity: 0.2,
+      color: PALETTE.biomeDecor.moss, emissive: PALETTE.biomeDecor.mossEmissive, emissiveIntensity: 0.2,
     });
-    this.rootMat = new THREE.MeshStandardMaterial({ color: 0x3a2a1a, roughness: 0.9 });
-    this.stalactiteMat = new THREE.MeshStandardMaterial({ color: 0x4a4540, roughness: 0.85 });  // brownish rock
+    this.rootMat = new THREE.MeshStandardMaterial({ color: PALETTE.biomeDecor.root, roughness: 0.9 });
+    this.stalactiteMat = new THREE.MeshStandardMaterial({ color: PALETTE.biomeDecor.stalactite, roughness: 0.85 });
     this.crystalMat = new THREE.MeshStandardMaterial({
-      color: 0x6a6aff, emissive: 0x4444aa, emissiveIntensity: 0.6, roughness: 0.3,
+      color: PALETTE.biomeDecor.crystal, emissive: PALETTE.biomeDecor.crystalEmissive, emissiveIntensity: 0.6, roughness: 0.3,
     });
-    this.crumbledMat = new THREE.MeshStandardMaterial({ color: 0xa08848, roughness: 0.9 });
-    this.sandDriftMat = new THREE.MeshStandardMaterial({ color: 0xc4a868, roughness: 0.8 });
-    this.crackMat = new THREE.MeshStandardMaterial({ color: 0x3a3020, roughness: 0.9 });        // dark earth crack
+    this.crumbledMat = new THREE.MeshStandardMaterial({ color: PALETTE.biomeDecor.crumbled, roughness: 0.9 });
+    this.sandDriftMat = new THREE.MeshStandardMaterial({ color: PALETTE.biomeDecor.sandDrift, roughness: 0.8 });
+    this.crackMat = new THREE.MeshStandardMaterial({ color: PALETTE.biomeDecor.crack, roughness: 0.9 });
     this.caveFloorOverlayMat = new THREE.MeshStandardMaterial({
-      color: 0x2a2520, metalness: 0.3, roughness: 0.4, transparent: true, opacity: 0.4,
+      color: PALETTE.biomeDecor.caveFloorOverlay, metalness: 0.3, roughness: 0.4, transparent: true, opacity: 0.4,
     });
 
     // Instanced coin meshes (one per tier)
@@ -687,6 +681,15 @@ export class WorldGenerator {
     for (const m of entry.caveDecor) m.visible = false;
     for (const m of entry.ruinsDecor) m.visible = false;
 
+    // Find the biome config for torch tint
+    const biome = BIOMES.find(b => b.name === biomeName);
+    if (biome) {
+      for (const l of entry.torchLights) {
+        l.color.setHex(biome.torchTint);
+        l.intensity = biomeName === 'Cave' ? TORCH_LIGHT_INTENSITY * 0.3 : TORCH_LIGHT_INTENSITY;
+      }
+    }
+
     // Show decorations for the active biome
     switch (biomeName) {
       case 'Temple':
@@ -694,16 +697,9 @@ export class WorldGenerator {
         break;
       case 'Jungle':
         for (const m of entry.jungleDecor) m.visible = true;
-        // Greenish torch tint
-        for (const l of entry.torchLights) l.color.setHex(0x66aa44);
         break;
       case 'Cave':
         for (const m of entry.caveDecor) m.visible = true;
-        // Dim blue torches
-        for (const l of entry.torchLights) {
-          l.color.setHex(0x4466cc);
-          l.intensity = TORCH_LIGHT_INTENSITY * 0.3;
-        }
         break;
       case 'Ruins':
         for (const m of entry.ruinsDecor) m.visible = true;
@@ -742,6 +738,10 @@ export class WorldGenerator {
       this.themeMaterials[i].floor.color.setHex(biome.themes[i].floor);
       this.themeMaterials[i].wall.color.setHex(biome.themes[i].wall);
       this.themeMaterials[i].accent.color.setHex(biome.themes[i].accent);
+    }
+    // Update stripe materials for biome-specific floor tones
+    for (let i = 0; i < biome.stripes.length && i < this.stripeMats.length; i++) {
+      this.stripeMats[i].color.setHex(biome.stripes[i]);
     }
   }
 
@@ -983,7 +983,7 @@ export class WorldGenerator {
         group.add(cover);
 
         // Earthy front wall (visible as player approaches — the "cliff edge" of the broken path)
-        const edgeMat = new THREE.MeshStandardMaterial({ color: 0x3a2a1a, roughness: 0.95 });
+        const edgeMat = new THREE.MeshStandardMaterial({ color: PALETTE.biomeDecor.root, roughness: 0.95 });
         const edgeDepth = 2.0;
         // Front edge (the approaching side — player sees this cross-section of dirt/earth)
         const frontGeo = new THREE.BoxGeometry(gapWidth, edgeDepth, 0.2);

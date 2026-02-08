@@ -16,6 +16,7 @@ import {
   SKY_COLOR, FOG_NEAR, FOG_FAR,
   CAMERA_OFFSET_Y, CAMERA_OFFSET_Z, CAMERA_LOOK_AHEAD, CAMERA_LERP_SPEED,
   BASE_SPEED, MAX_SPEED, MULTIPLIER_VALUE, LANE_POSITIONS, COIN_TIERS,
+  PALETTE, BIOMES,
   type BiomeConfig,
 } from './config.ts';
 import type { Coin } from './WorldGenerator.ts';
@@ -77,7 +78,7 @@ export class Game {
   private biomeTargetSky = new THREE.Color(SKY_COLOR);
   private biomeTargetFogNear = FOG_NEAR;
   private biomeTargetFogFar = FOG_FAR;
-  private biomeTargetLightColor = new THREE.Color(0xbbffbb);
+  private biomeTargetLightColor = new THREE.Color(BIOMES[0].lightColor);
   private biomeTargetLightIntensity = 0.65;
 
   // DOM
@@ -114,10 +115,10 @@ export class Game {
     container.appendChild(this.renderer.domElement);
 
     // Lighting
-    const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+    const ambient = new THREE.AmbientLight(PALETTE.lighting.ambient, 0.6);
     this.scene.add(ambient);
 
-    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    const dirLight = new THREE.DirectionalLight(PALETTE.lighting.directional, 0.8);
     dirLight.position.set(5, 15, -10);
     dirLight.castShadow = true;
     dirLight.shadow.mapSize.set(1024, 1024);
@@ -323,7 +324,7 @@ export class Game {
     this.biomeTargetSky.setHex(SKY_COLOR);
     this.biomeTargetFogNear = FOG_NEAR;
     this.biomeTargetFogFar = FOG_FAR;
-    this.biomeTargetLightColor.setHex(0xbbffbb);
+    this.biomeTargetLightColor.setHex(BIOMES[0].lightColor);
     this.biomeTargetLightIntensity = 0.65;
 
     // Generate initial world

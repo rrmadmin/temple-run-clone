@@ -7,6 +7,7 @@ import {
   MAGNET_DURATION, MAGNET_COIN_RADIUS,
   MULTIPLIER_DURATION, MULTIPLIER_VALUE,
   SPEEDBOOST_DURATION, SLOWMO_DURATION, COINFRENZY_DURATION,
+  PALETTE,
 } from './config.ts';
 
 export type PowerUpType = 'magnet' | 'shield' | 'multiplier' | 'speedboost' | 'slowmo' | 'coinfrenzy';
@@ -35,12 +36,12 @@ const geometries: Record<PowerUpType, THREE.BufferGeometry> = {
 };
 
 const materials: Record<PowerUpType, THREE.MeshStandardMaterial> = {
-  magnet: new THREE.MeshStandardMaterial({ color: 0x4488ff, emissive: 0x1144aa, emissiveIntensity: 0.4 }),
-  shield: new THREE.MeshStandardMaterial({ color: 0x44ff66, emissive: 0x11aa33, emissiveIntensity: 0.4 }),
-  multiplier: new THREE.MeshStandardMaterial({ color: 0xffcc00, emissive: 0xaa8800, emissiveIntensity: 0.4 }),
-  speedboost: new THREE.MeshStandardMaterial({ color: 0xff6600, emissive: 0xaa3300, emissiveIntensity: 0.4 }),
-  slowmo: new THREE.MeshStandardMaterial({ color: 0x6644ff, emissive: 0x3322aa, emissiveIntensity: 0.4 }),
-  coinfrenzy: new THREE.MeshStandardMaterial({ color: 0xffdd00, emissive: 0xbbaa00, emissiveIntensity: 0.4 }),
+  magnet: new THREE.MeshStandardMaterial({ color: PALETTE.powerups.magnet.main, emissive: PALETTE.powerups.magnet.emissive, emissiveIntensity: 0.4 }),
+  shield: new THREE.MeshStandardMaterial({ color: PALETTE.powerups.shield.main, emissive: PALETTE.powerups.shield.emissive, emissiveIntensity: 0.4 }),
+  multiplier: new THREE.MeshStandardMaterial({ color: PALETTE.powerups.multiplier.main, emissive: PALETTE.powerups.multiplier.emissive, emissiveIntensity: 0.4 }),
+  speedboost: new THREE.MeshStandardMaterial({ color: PALETTE.powerups.speedBoost.main, emissive: PALETTE.powerups.speedBoost.emissive, emissiveIntensity: 0.4 }),
+  slowmo: new THREE.MeshStandardMaterial({ color: PALETTE.powerups.slowMo.main, emissive: PALETTE.powerups.slowMo.emissive, emissiveIntensity: 0.4 }),
+  coinfrenzy: new THREE.MeshStandardMaterial({ color: PALETTE.powerups.coinFrenzy.main, emissive: PALETTE.powerups.coinFrenzy.emissive, emissiveIntensity: 0.4 }),
 };
 
 const typeWeights: PowerUpType[] = ['magnet', 'magnet', 'shield', 'shield', 'multiplier', 'multiplier', 'speedboost', 'slowmo', 'coinfrenzy'];
