@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Temple Run</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { overflow: hidden; background: #000; font-family: 'Segoe UI', Arial, sans-serif; }
+    #game-container { width: 100vw; height: 100vh; position: relative; }
+    canvas { display: block; }
+
+    #hud {
+      position: absolute; top: 20px; left: 20px;
+      color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+      pointer-events: none; z-index: 10;
+    }
+    #hud.hidden { display: none; }
+    .hud-score { font-size: 28px; font-weight: bold; }
+    .hud-distance { font-size: 16px; opacity: 0.8; margin-top: 4px; }
+    .hud-coins {
+      font-size: 32px; font-weight: bold; color: #ffd700; margin-top: 8px;
+      text-shadow: 0 0 12px rgba(255,215,0,0.5), 2px 2px 4px rgba(0,0,0,0.8);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .hud-coins .coin-icon {
+      width: 24px; height: 24px; background: #ffd700;
+      border-radius: 50%; border: 2px solid #daa520;
+      box-shadow: 0 0 8px rgba(255,215,0,0.5);
+      display: inline-block; flex-shrink: 0;
+    }
+    .hud-coins.pop {
+      animation: coin-pop 0.25s ease-out;
+    }
+    @keyframes coin-pop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.25); }
+      100% { transform: scale(1); }
+    }
+
+    /* Flying coin animation */
+    .coin-fly {
+      position: fixed; z-index: 100; pointer-events: none;
+      width: 50px; height: 50px; background: #ffd700;
+      border-radius: 50%; border: 3px solid #daa520;
+    }
+    .coin-fly.animate {
+      transition: all 0.8s cubic-bezier(0.2, 0.8, 0.3, 1);
+      opacity: 0;
+      transform: scale(0.7);
+    }
+
+    .overlay {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: radial-gradient(ellipse at center, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.8) 70%, rgba(0,0,0,0.9) 100%);
+      z-index: 20; color: #fff;
+    }
+    .overlay.hidden { display: none; }
+    .overlay h1 {
+      font-size: 52px; margin-bottom: 8px; letter-spacing: 4px;
+      text-shadow: 0 0 30px rgba(255,215,0,0.6), 0 0 60px rgba(255,215,0,0.3);
+    }
+    .overlay h2 { font-size: 36px; margin-bottom: 16px; }
+    .overlay p { font-size: 18px; opacity: 0.8; margin-bottom: 6px; }
+    .overlay .btn {
+      margin-top: 24px; padding: 14px 48px; font-size: 22px;
+      background: #e63946; color: #fff; border: none; border-radius: 8px;
+      cursor: pointer; letter-spacing: 2px; transition: background 0.2s;
+      animation: btn-pulse 2s ease-in-out infinite;
+    }
+    .overlay .btn:hover { background: #ff6b6b; }
+    .final-score { font-size: 64px; color: #ffd700; font-weight: bold; margin: 8px 0; }
+    .controls { font-size: 13px; opacity: 0.4; margin-top: 32px; line-height: 1.8; }
+
+    @keyframes btn-pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+    }
+
+    .overlay.fade-in {
+      animation: overlay-fade-in 0.5s ease-out;
+    }
+    @keyframes overlay-fade-in {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <div id="hud" class="hidden">
+      <div class="hud-score" id="score-val">0</div>
+      <div class="hud-distance" id="dist-val">0m</div>
+      <div class="hud-coins" id="coins-val"><span class="coin-icon"></span><span id="coins-num">0</span></div>
+    </div>
+
+    <div id="powerup-display" style="position:absolute;top:20px;right:20px;color:#fff;font-size:16px;font-weight:bold;z-index:10;text-align:right;pointer-events:none;text-shadow:2px 2px 4px rgba(0,0,0,0.8);"></div>
+
+    <div id="menu-screen" class="overlay">
+      <h1>TEMPLE RUN</h1>
+      <p>Endless Runner</p>
+      <button class="btn" id="play-btn">PLAY</button>
+      <div id="menu-stats" class="controls">
+        <span id="stat-best">Best: 0</span><br>
+        <span id="stat-games">Games Played: 0</span><br>
+        <span id="stat-dist">Best Distance: 0m</span>
+      </div>
+      <div class="controls">
+        A/D or Arrow Keys: Switch Lanes<br>
+        Space/W/Up: Jump &nbsp;|&nbsp; S/Down: Slide<br>
+        P: Pause
+      </div>
+    </div>
+
+    <div id="gameover-screen" class="overlay hidden">
+      <h2>GAME OVER</h2>
+      <div class="final-score" id="final-score">0</div>
+      <p id="final-dist">0m</p>
+      <p id="final-coins">0 coins</p>
+      <p id="death-biome" style="font-size:14px;opacity:0.5;margin-top:4px;"></p>
+      <p id="high-score" style="color:#ffd700;font-size:16px;margin-top:8px;opacity:0.9;"></p>
+      <button class="btn" id="restart-btn">PLAY AGAIN</button>
+    </div>
+
+    <div id="pause-screen" class="overlay hidden">
+      <h2>PAUSED</h2>
+      <p id="pause-score"></p>
+      <p id="pause-dist"></p>
+      <button class="btn" id="resume-btn">RESUME</button>
+    </div>
+    <button id="mute-btn" style="position:absolute;bottom:20px;right:20px;z-index:20;background:rgba(0,0,0,0.5);color:#fff;border:1px solid #555;border-radius:4px;padding:8px 12px;cursor:pointer;font-size:14px;">Sound: ON</button>
+    <div id="milestone" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#ffd700;font-size:48px;font-weight:bold;text-shadow:0 0 20px rgba(255,215,0,0.8);z-index:15;pointer-events:none;opacity:0;transition:opacity 0.3s;"></div>
+    <div id="nearmiss" style="position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);color:#ff4444;font-size:36px;font-weight:bold;text-shadow:0 0 16px rgba(255,68,68,0.8);z-index:15;pointer-events:none;opacity:0;transition:opacity 0.2s;">CLOSE CALL!</div>
+  </div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
