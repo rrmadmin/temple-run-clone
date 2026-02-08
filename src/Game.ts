@@ -15,7 +15,7 @@ import { ChaserSystem } from './ChaserSystem.ts';
 import {
   SKY_COLOR, FOG_NEAR, FOG_FAR,
   CAMERA_OFFSET_Y, CAMERA_OFFSET_Z, CAMERA_LOOK_AHEAD, CAMERA_LERP_SPEED,
-  BASE_SPEED, MAX_SPEED, MULTIPLIER_VALUE, LANE_POSITIONS,
+  BASE_SPEED, MAX_SPEED, MULTIPLIER_VALUE, LANE_POSITIONS, COIN_TIERS,
   type BiomeConfig,
 } from './config.ts';
 import type { Coin } from './WorldGenerator.ts';
@@ -587,18 +587,20 @@ export class Game {
     const targetX = counterRect.left + counterRect.width / 2;
     const targetY = counterRect.top + counterRect.height / 2;
 
-    // Create flying coin DOM element
+    // Create flying coin DOM element with tier-matched color
+    const tierColor = '#' + COIN_TIERS[coin.tier].color.toString(16).padStart(6, '0');
     const el = document.createElement('div');
     el.className = 'coin-fly';
-    el.style.left = `${screenX - 25}px`;
-    el.style.top = `${screenY - 25}px`;
+    el.style.background = tierColor;
+    el.style.left = `${screenX - 15}px`;
+    el.style.top = `${screenY - 15}px`;
     document.body.appendChild(el);
 
     // Trigger fly animation on next frame
     requestAnimationFrame(() => {
       el.classList.add('animate');
-      el.style.left = `${targetX - 25}px`;
-      el.style.top = `${targetY - 25}px`;
+      el.style.left = `${targetX - 15}px`;
+      el.style.top = `${targetY - 15}px`;
       el.style.opacity = '0.3';
       el.style.transform = 'scale(0.7)';
     });
